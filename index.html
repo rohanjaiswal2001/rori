@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RoRi, sugar free</title>
-<meta name="description" content="Rohan & Riya's sugar-free day counter">
+<meta name="description" content="Rohan & Riya: sugar-free and alcohol-free day streaks">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -130,22 +130,63 @@
   .ms{font-size:12px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
   .ms.done{background:var(--sage);border-color:var(--sage);color:#fff}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:40px;font-family:Fraunces,serif;font-style:italic}
+  /* tabs */
+  .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:5px;width:fit-content;margin:0 0 20px}
+  .tab{border:0;background:transparent;color:var(--muted);font:600 14px Inter,sans-serif;padding:9px 18px;border-radius:99px;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .tab b{font:500 13px Inter,sans-serif;background:var(--empty);color:var(--ink);border-radius:99px;padding:1px 8px;font-variant-numeric:tabular-nums}
+  .tab[aria-selected="true"]{background:var(--btn);color:var(--btn-ink)}
+  .tab[aria-selected="true"] b{background:rgba(255,255,255,.22);color:inherit}
+  .streakno{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;color:var(--sage);background:var(--sage-soft);padding:3px 10px;border-radius:99px}
+
+  /* alcohol bits */
+  .choices.two{grid-template-columns:repeat(2,1fr)}
+  .drinkbox{margin-top:10px;border:1px dashed var(--line);border-radius:14px;padding:12px}
+  .drinkbox .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+  .stepper{display:flex;align-items:center;gap:4px}
+  .stepper button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 16px Inter,sans-serif;cursor:pointer}
+  .stepper span{min-width:28px;text-align:center;font:500 20px Fraunces,serif;font-variant-numeric:tabular-nums}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:5px 10px;font:500 12px Inter,sans-serif;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--rose-soft);border-color:var(--rose)}
+  .day .h{display:grid;place-items:center;position:relative}
+  .day .h em{font-style:normal;font-size:15px;line-height:1}
+  .day .h sub{position:absolute;bottom:2px;right:3px;font-size:9px;font-weight:700;color:var(--ink)}
+  .day.alc .n{inset:auto auto 3px 5px;font-size:9px;display:block}
+  .day.alc .h.slip{background:var(--rose-soft)}
+  .day.alc .h.slip~.n{color:var(--ink)}
+  .day.sel{outline:2px solid var(--btn);outline-offset:1px}
+  .gap{margin-top:12px;font-size:13px;color:var(--ink);background:var(--honey-soft);border-radius:12px;padding:10px 12px}
+
+  /* streak history */
+  .hist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .hrow{display:grid;grid-template-columns:60px 1fr auto;align-items:center;gap:12px;font-size:13px}
+  .hrow .bar{height:8px;border-radius:99px;background:var(--sage);min-width:6px}
+  .hrow.cur .bar{background:linear-gradient(90deg,var(--sage),var(--btn))}
+  .hrow .k{color:var(--muted);font-weight:600}
+  .hrow .v{color:var(--muted);white-space:nowrap}
+  .hrow .v b{color:var(--ink);font-weight:600}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1 class="names"><span class="rohan">Ro</span><span class="riya">Ri</span>, <em>sugar free</em></h1>
+    <h1 class="names"><span class="rohan">Ro</span><span class="riya">Ri</span>, <em id="titleEm">sugar free</em></h1>
     <div class="hdr-right">
       <div class="sync"><span class="dot" id="dot"></span><span id="syncText">connecting…</span></div>
       <button class="theme" id="themeBtn" aria-label="Toggle light/dark mode">🌙</button>
     </div>
   </header>
 
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="sugar">🍬 Sugar <b id="tc-sugar">0</b></button>
+    <button class="tab" role="tab" data-tab="alcohol">🍸 Alcohol <b id="tc-alcohol">0</b></button>
+  </nav>
+
   <section class="card hero-wrap">
    <div class="photo"><img src="photo.jpg" alt="Rohan and Riya"></div>
    <div class="hero">
-    <div class="label" id="heroLabel">Days sugar-free, together</div>
+    <div class="label" id="heroLabel"></div>
+    <div class="streakno" id="streakNo" hidden></div>
     <div class="big" id="heroNum">0</div>
     <div class="sub" id="heroSub">&nbsp;</div>
     <div class="progress"><i id="msBar" style="width:0"></i></div>
@@ -157,7 +198,7 @@
   <section class="card">
     <div class="datebar">
       <div>
-        <div class="label">Tonight's check-in</div>
+        <div class="label">Check-in</div>
         <div class="serif" id="dateTitle"></div>
       </div>
       <input type="date" id="datePick" aria-label="Pick a day to log">
@@ -168,13 +209,13 @@
   <section class="card">
     <div class="label">The calendar</div>
     <div id="calendar"></div>
-    <div class="legend">
-      <span><i style="background:var(--sage)"></i>No sugar</span>
-      <span><i style="background:var(--honey)"></i>Healthy sugar (still counts)</span>
-      <span><i style="background:var(--rose)"></i>Slipped</span>
-      <span><i style="background:var(--empty)"></i>Not logged</span>
-      <span>Left half Rohan · right half Riya</span>
-    </div>
+    <div class="legend" id="legend"></div>
+    <div id="gaps"></div>
+  </section>
+
+  <section class="card">
+    <div class="label">Streak history · together</div>
+    <div class="hist" id="history"></div>
   </section>
 
   <section class="card">
@@ -182,36 +223,66 @@
     <div id="notes" style="margin-top:6px"></div>
   </section>
 
-  <footer>Log every night before sleeping. Tap any day on the calendar to fix it.</footer>
+  <footer>Log every night before sleeping. Missed a day? Tap it on the calendar and fill it in.</footer>
 </div>
 
 <script>
 const SUPABASE_URL = "https://gxvgujdguviqjqhilrms.supabase.co";
 const SUPABASE_KEY = "sb_publishable_rvwJxflLt6ykiOhvq-GCOA_hONUr3YL";
-const START = "2026-11-09";               // Day 1 of no sugar
-const PEOPLE = [
-  { id: "rohan", name: "Rohan", color: "var(--rohan)" },
-  { id: "riya",  name: "Riya",  color: "var(--riya)"  },
-];
+const PEOPLE = [ { id:"rohan", name:"Rohan" }, { id:"riya", name:"Riya" } ];
 const MILESTONES = [3, 7, 14, 21, 30, 50, 75, 100, 150, 200, 365];
-const STATUS = {
-  clean:   { icon: "🌿", label: "No sugar" },
-  healthy: { icon: "🍯", label: "Healthy sugar" },
-  slip:    { icon: "🍰", label: "Slipped" },
+const DRINKS = {
+  tequila:  { e:"🌵", n:"Tequila" },
+  vodka:    { e:"🧊", n:"Vodka" },
+  whiskey:  { e:"🥃", n:"Whiskey" },
+  wine:     { e:"🍷", n:"Wine" },
+  beer:     { e:"🍺", n:"Beer" },
+  rum:      { e:"🏴‍☠️", n:"Rum" },
+  gin:      { e:"🍸", n:"Gin" },
+  bubbly:   { e:"🍾", n:"Champagne" },
+  cocktail: { e:"🍹", n:"Cocktail" },
+  shots:    { e:"🔥", n:"Shots" },
+  other:    { e:"🥂", n:"Other" },
+};
+const HABITS = {
+  sugar: {
+    start: "2026-11-09", title: "sugar free", heroLabel: "Days sugar-free, together", countdown: "days until we quit sugar",
+    statuses: {
+      clean:   { icon:"🌿", label:"No sugar" },
+      healthy: { icon:"🍯", label:"Healthy sugar" },
+      slip:    { icon:"🍰", label:"Slipped" },
+    },
+    legend: [["var(--sage)","No sugar"],["var(--honey)","Healthy sugar (still counts)"],["var(--rose)","Slipped"]],
+    notePh: { healthy:"What was it? e.g. 2 dates, mango, honey in tea", slip:"What happened? No judgement.", _:"Any note for today (optional)" },
+    emptyNotes: "Nothing yet. When you have something sweet but healthy, jot it down here.",
+  },
+  alcohol: {
+    start: "2026-11-09", title: "alcohol free", heroLabel: "Dry days in a row, together", countdown: "days until dry days start",
+    statuses: {
+      clean: { icon:"💧", label:"Dry day" },
+      slip:  { icon:"🥂", label:"Had drinks" },
+    },
+    legend: [["var(--sage)","Dry day"],["var(--rose-soft)","Drank (emoji = what, number = how many)"]],
+    notePh: { slip:"What did you drink? e.g. tequila with water, vodka with sprite", _:"Any note for today (optional)" },
+    emptyNotes: "Nothing yet. On drinking days, note what you had here.",
+  },
 };
 
 const H = { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" };
-let log = {};            // log["2026-11-09"]["rohan"] = {status,note}
+let tab = "sugar";
+try{ const h = location.hash.slice(1) || localStorage.getItem("rori-tab"); if(HABITS[h]) tab = h; }catch(e){}
+const log = { sugar:{}, alcohol:{} };   // log[habit][day][person] = {status,note,drinks,types}
 let selDate = todayStr();
-const draft = {};        // draft[person] = {status,note}
+let draft = {};
 
-/* ---------- dates (local time) ---------- */
+/* ---------- dates (local) ---------- */
 function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function todayStr(){ return ymd(new Date()); }
 function parse(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
 function addDays(s,n){ const d=parse(s); d.setDate(d.getDate()+n); return ymd(d); }
 function diffDays(a,b){ return Math.round((parse(b)-parse(a))/864e5); }
 function pretty(s,opts={weekday:"long",day:"numeric",month:"long"}){ return parse(s).toLocaleDateString("en-IN",opts); }
+const short = s => pretty(s,{day:"numeric",month:"short"});
 
 /* ---------- sync ---------- */
 function setSync(state,text){ document.getElementById("dot").className="dot "+state; document.getElementById("syncText").textContent=text; }
@@ -219,11 +290,14 @@ function setSync(state,text){ document.getElementById("dot").className="dot "+st
 async function load(){
   setSync("busy","syncing…");
   try{
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/sugar_log?select=day,person,status,note&order=day.asc`,{headers:H});
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/habit_log?select=habit,day,person,status,note,drinks,drink_types&order=day.asc`,{headers:H});
     if(!r.ok) throw new Error(r.status);
     const rows = await r.json();
-    log = {};
-    rows.forEach(x => { (log[x.day] ||= {})[x.person] = { status:x.status, note:x.note||"" }; });
+    log.sugar = {}; log.alcohol = {};
+    rows.forEach(x => {
+      if(!log[x.habit]) return;
+      (log[x.habit][x.day] ||= {})[x.person] = { status:x.status, note:x.note||"", drinks:x.drinks||0, types:x.drink_types||[] };
+    });
     setSync("ok","synced");
   }catch(e){ setSync("err","offline – couldn't load"); }
   renderAll();
@@ -233,14 +307,15 @@ async function save(pid){
   const d = draft[pid]; if(!d || !d.status) return;
   const btn = document.getElementById("save-"+pid); btn.disabled = true; btn.textContent = "Saving…";
   setSync("busy","saving…");
+  const drank = tab==="alcohol" && d.status==="slip";
+  const body = { habit:tab, day:selDate, person:pid, status:d.status, note:(d.note||"").trim()||null,
+                 drinks: drank ? Math.max(1,d.drinks||1) : null, drink_types: drank ? d.types : null,
+                 updated_at:new Date().toISOString() };
   try{
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/sugar_log?on_conflict=day,person`,{
-      method:"POST",
-      headers:{...H, Prefer:"resolution=merge-duplicates,return=minimal"},
-      body: JSON.stringify({ day:selDate, person:pid, status:d.status, note:(d.note||"").trim()||null, updated_at:new Date().toISOString() })
-    });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/habit_log?on_conflict=habit,day,person`,{
+      method:"POST", headers:{...H, Prefer:"resolution=merge-duplicates,return=minimal"}, body:JSON.stringify(body) });
     if(!r.ok) throw new Error(r.status);
-    (log[selDate] ||= {})[pid] = { status:d.status, note:(d.note||"").trim() };
+    (log[tab][selDate] ||= {})[pid] = { status:body.status, note:body.note||"", drinks:body.drinks||0, types:body.drink_types||[] };
     delete draft[pid];
     setSync("ok","saved");
   }catch(e){ setSync("err","save failed – try again"); }
@@ -248,80 +323,121 @@ async function save(pid){
 }
 
 /* ---------- streak maths ---------- */
-const ok = s => s === "clean" || s === "healthy";
-function dayOk(day, who){ // who: person id or "both"
-  const e = log[day] || {};
-  return who === "both" ? PEOPLE.every(p => e[p.id] && ok(e[p.id].status)) : !!(e[who] && ok(e[who].status));
+const okS = s => s === "clean" || s === "healthy";
+function dayOk(h, day, who){
+  const e = log[h][day] || {};
+  return who === "both" ? PEOPLE.every(p => e[p.id] && okS(e[p.id].status)) : !!(e[who] && okS(e[who].status));
 }
-function currentStreak(who){
-  const t = todayStr(); if(t < START) return 0;
-  // if tonight isn't logged yet, count up to yesterday so the streak doesn't look broken during the day
-  let d = dayOk(t,who) ? t : addDays(t,-1), n = 0;
-  while(d >= START && dayOk(d,who)){ n++; d = addDays(d,-1); }
+function slipped(h, day, who){ // someone logged a slip on this day
+  const e = log[h][day] || {};
+  return (who === "both" ? PEOPLE.map(p=>p.id) : [who]).some(id => e[id] && !okS(e[id].status));
+}
+// all runs of consecutive good days; today only counts if logged (an unlogged today never breaks a run)
+function runs(h, who){
+  const S = HABITS[h].start, t = todayStr(), out = [];
+  let cur = null;
+  for(let d=S; d<=t; d=addDays(d,1)){
+    if(dayOk(h,d,who)){ if(!cur) cur = {from:d, to:d, n:0}; cur.to = d; cur.n++; }
+    else if(d !== t || slipped(h,d,who)){ if(cur){ out.push(cur); cur = null; } }
+  }
+  if(cur){ cur.live = cur.to === t || (cur.to === addDays(t,-1) && !slipped(h,t,who)); out.push(cur); }
+  return out;
+}
+function currentStreak(h, who){ const r = runs(h,who), last = r[r.length-1]; return last && last.live ? last.n : 0; }
+function bestStreak(h, who){ return runs(h,who).reduce((m,r)=>Math.max(m,r.n),0); }
+function countStatus(h,pid,s){ return Object.values(log[h]).filter(e => e[pid] && e[pid].status===s).length; }
+function drinksLast7(pid){
+  let n = 0; const t = todayStr();
+  for(let i=0;i<7;i++){ const e = (log.alcohol[addDays(t,-i)]||{})[pid]; if(e && e.status==="slip") n += e.drinks||0; }
   return n;
 }
-function bestStreak(who){
-  const t = todayStr(); let best=0, run=0;
-  for(let d=START; d<=t; d=addDays(d,1)){ if(dayOk(d,who)){ run++; best=Math.max(best,run);} else if(d!==t) run=0; }
-  return best;
-}
-function countStatus(pid,s){ return Object.values(log).filter(e => e[pid] && e[pid].status===s).length; }
 
 /* ---------- render ---------- */
-function renderAll(){ renderHero(); renderPeople(); renderCalendar(); renderNotes(); }
+function renderAll(){
+  const H_ = HABITS[tab];
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===tab));
+  Object.keys(HABITS).forEach(h => document.getElementById("tc-"+h).textContent = todayStr() < HABITS[h].start ? "–" : currentStreak(h,"both"));
+  document.getElementById("titleEm").textContent = H_.title;
+  document.title = "RoRi, " + H_.title;
+  document.getElementById("legend").innerHTML =
+    H_.legend.map(([c,l])=>`<span><i style="background:${c}"></i>${l}</span>`).join("") +
+    `<span><i style="background:var(--empty)"></i>Not logged</span><span>Left half Rohan · right half Riya</span>`;
+  renderHero(); renderPeople(); renderCalendar(); renderGaps(); renderHistory(); renderNotes();
+}
 
 function renderHero(){
-  const t = todayStr();
-  const num = document.getElementById("heroNum"), sub = document.getElementById("heroSub"), lab = document.getElementById("heroLabel");
-  if(t < START){
-    const n = diffDays(t,START);
-    lab.textContent = "Countdown to day one";
+  const h = tab, H_ = HABITS[h], t = todayStr(), S = H_.start;
+  const num = document.getElementById("heroNum"), sub = document.getElementById("heroSub"), lab = document.getElementById("heroLabel"), no = document.getElementById("streakNo");
+  if(t < S){
+    const n = diffDays(t,S);
+    lab.textContent = "Countdown to day one"; no.hidden = true;
     num.textContent = n;
-    sub.textContent = n===1 ? "day to go — last dessert tonight 🍫" : "days until we quit sugar";
-    document.getElementById("msText").textContent = "Starts " + pretty(START);
+    sub.textContent = n===1 ? "day to go. Day one starts tomorrow." : H_.countdown;
+    document.getElementById("msText").textContent = "Starts " + pretty(S);
     document.getElementById("msBar").style.width = "0";
     renderMilestones(0); return;
   }
-  const s = currentStreak("both");
-  lab.textContent = "Days sugar-free, together";
+  const r = runs(h,"both"), last = r[r.length-1], s = last && last.live ? last.n : 0;
+  const streakNo = s ? r.length : r.length + 1;
+  lab.textContent = H_.heroLabel;
+  no.hidden = false; no.textContent = `Streak #${streakNo}` + (streakNo>1 ? ` · best so far ${bestStreak(h,"both")}d` : "");
   num.textContent = s;
-  const loggedToday = PEOPLE.every(p => log[t] && log[t][p.id]);
-  sub.textContent = s===0 ? "Day one starts tonight. You've got this." :
+  const loggedToday = PEOPLE.every(p => log[h][t] && log[h][t][p.id]);
+  sub.textContent = s===0 ? (r.length ? "Fresh start. Day one of a new streak." : "Day one starts tonight. You've got this.") :
                     s===1 ? "day down. Many more to go." : "days in a row, both of you";
   const next = MILESTONES.find(m => m > s) || s;
   const prev = [...MILESTONES].reverse().find(m => m <= s) || 0;
   document.getElementById("msBar").style.width = (next===prev?100:((s-prev)/(next-prev))*100) + "%";
   document.getElementById("msText").textContent =
-    (next>s ? `${next-s} more to reach ${next} days` : "Every milestone hit 🎉") +
-    (loggedToday ? "" : " · tonight's check-in pending");
+    (next>s ? `${next-s} more to reach ${next} days` : "Every milestone hit 🎉") + (loggedToday ? "" : " · tonight's check-in pending");
   renderMilestones(s);
 }
 function renderMilestones(s){
-  document.getElementById("milestones").innerHTML =
-    MILESTONES.slice(0,8).map(m => `<span class="ms ${s>=m?"done":""}">${m}d</span>`).join("");
+  document.getElementById("milestones").innerHTML = MILESTONES.slice(0,8).map(m => `<span class="ms ${s>=m?"done":""}">${m}d</span>`).join("");
+}
+
+function freshDraft(saved){ return saved ? {...saved, types:[...(saved.types||[])]} : {status:null,note:"",drinks:0,types:[]}; }
+function isDirty(pid){
+  const saved = (log[tab][selDate]||{})[pid], d = draft[pid];
+  if(!saved) return true;
+  return saved.status!==d.status || (saved.note||"")!==(d.note||"") ||
+    (tab==="alcohol" && d.status==="slip" && ((saved.drinks||0)!==(d.drinks||0) || saved.types.join()!==d.types.join()));
 }
 
 function renderPeople(){
-  document.getElementById("dateTitle").textContent = selDate===todayStr() ? "Tonight · "+pretty(selDate,{day:"numeric",month:"short"}) : pretty(selDate);
-  const dp = document.getElementById("datePick"); dp.value = selDate; dp.max = todayStr();
-  const before = selDate < START;
+  const H_ = HABITS[tab];
+  document.getElementById("dateTitle").textContent = selDate===todayStr() ? "Tonight · "+short(selDate) : pretty(selDate);
+  const dp = document.getElementById("datePick"); dp.value = selDate; dp.max = todayStr(); dp.min = H_.start;
+  const before = selDate < H_.start;
   document.getElementById("people").innerHTML = PEOPLE.map(p => {
-    const saved = (log[selDate]||{})[p.id];
-    const d = draft[p.id] || (saved ? {...saved} : {status:null,note:""});
-    draft[p.id] = d;
-    const dirty = !saved || saved.status!==d.status || (saved.note||"")!==(d.note||"");
+    const saved = (log[tab][selDate]||{})[p.id];
+    const d = draft[p.id] || (draft[p.id] = freshDraft(saved));
+    const dirty = isDirty(p.id);
+    const st = Object.entries(H_.statuses);
+    const third = tab==="alcohol"
+      ? `<div class="stat"><b>${drinksLast7(p.id)}</b><span>drinks · 7 days</span></div>`
+      : `<div class="stat"><b>${countStatus(tab,p.id,"slip")}</b><span>slips</span></div>`;
+    const drinkUI = (tab==="alcohol" && d.status==="slip") ? `
+      <div class="drinkbox">
+        <div class="top"><span class="label">How many drinks?</span>
+          <div class="stepper"><button data-step="-1" data-p="${p.id}" aria-label="fewer">−</button><span>${d.drinks||1}</span><button data-step="1" data-p="${p.id}" aria-label="more">+</button></div>
+        </div>
+        <div class="chips">${Object.entries(DRINKS).map(([k,v]) =>
+          `<button class="chip" data-p="${p.id}" data-drink="${k}" aria-pressed="${d.types.includes(k)}">${v.e} ${v.n}</button>`).join("")}</div>
+      </div>` : "";
+    const ph = H_.notePh[d.status] || H_.notePh._;
     return `<div class="person">
       <h2 class="${p.id}"><img class="av" src="${p.id}.jpg" alt="${p.name}">${p.name}</h2>
       <div class="stats">
-        <div class="stat"><b class="c-${p.id}">${currentStreak(p.id)}</b><span>current streak</span></div>
-        <div class="stat"><b>${bestStreak(p.id)}</b><span>best</span></div>
-        <div class="stat"><b>${countStatus(p.id,"slip")}</b><span>slips</span></div>
+        <div class="stat"><b class="c-${p.id}">${currentStreak(tab,p.id)}</b><span>current streak</span></div>
+        <div class="stat"><b>${bestStreak(tab,p.id)}</b><span>best</span></div>
+        ${third}
       </div>
-      <div class="choices">
-        ${Object.entries(STATUS).map(([k,v]) =>
-          `<button class="choice" data-p="${p.id}" data-s="${k}" aria-pressed="${d.status===k}"><small>${v.icon}</small>${v.label}</button>`).join("")}
+      <div class="choices ${st.length===2?"two":""}">
+        ${st.map(([k,v]) => `<button class="choice" data-p="${p.id}" data-s="${k}" aria-pressed="${d.status===k}"><small>${v.icon}</small>${v.label}</button>`).join("")}
       </div>
-      <textarea data-note="${p.id}" rows="2" placeholder="${d.status==="healthy"?"What was it? e.g. 2 dates, mango, honey in tea":d.status==="slip"?"What happened? No judgement.":"Any note for today (optional)"}">${esc(d.note||"")}</textarea>
+      ${drinkUI}
+      <textarea data-note="${p.id}" rows="2" placeholder="${ph}">${esc(d.note||"")}</textarea>
       <div class="row">
         <span class="saved">${before?"Before day one":saved?(dirty?"Unsaved changes":"Saved ✓"):"Not logged yet"}</span>
         <button class="btn" id="save-${p.id}" ${(!d.status||!dirty)?"disabled":""}>Save</button>
@@ -330,22 +446,30 @@ function renderPeople(){
   }).join("");
 }
 
+function half(e){
+  if(!e) return `<span class="h"></span>`;
+  if(tab==="alcohol" && e.status==="slip"){
+    const em = (e.types && e.types.length) ? e.types.slice(0,1).map(k => (DRINKS[k]||DRINKS.other).e).join("") : "🥂";
+    return `<span class="h slip" title="${e.drinks||""} drink(s)"><em>${em}</em>${e.drinks?`<sub>${e.drinks}</sub>`:""}</span>`;
+  }
+  return `<span class="h ${e.status}"></span>`;
+}
+
 function renderCalendar(){
-  const t = todayStr(), el = document.getElementById("calendar");
-  const startD = parse(START), endD = parse(t > START ? t : START);
+  const t = todayStr(), S = HABITS[tab].start, el = document.getElementById("calendar");
+  const startD = parse(S), endD = parse(t > S ? t : S);
   let html = "", y = startD.getFullYear(), m = startD.getMonth();
   while(new Date(y,m,1) <= endD){
     const first = new Date(y,m,1), days = new Date(y,m+1,0).getDate();
-    const lead = (first.getDay()+6)%7; // Monday-first
+    const lead = (first.getDay()+6)%7;
     html += `<div class="monthname">${first.toLocaleDateString("en-IN",{month:"long",year:"numeric"})}</div><div class="cal">`;
     html += ["M","T","W","T","F","S","S"].map(x=>`<div class="dow">${x}</div>`).join("");
     html += "<div></div>".repeat(lead);
     for(let i=1;i<=days;i++){
-      const ds = ymd(new Date(y,m,i)), e = log[ds]||{};
-      const cls = ds>t?"future":ds<START?"before":"";
-      html += `<div class="day ${cls} ${ds===t?"today":""}" ${cls?"":`data-day="${ds}"`} title="${pretty(ds)}">
-        ${PEOPLE.map(p=>`<span class="h ${e[p.id]?e[p.id].status:""}"></span>`).join("")}
-        <span class="n">${i}</span></div>`;
+      const ds = ymd(new Date(y,m,i)), e = log[tab][ds]||{};
+      const cls = ds>t?"future":ds<S?"before":"";
+      html += `<div class="day ${tab==="alcohol"?"alc":""} ${cls} ${ds===t?"today":""} ${ds===selDate?"sel":""}" ${cls?"":`data-day="${ds}"`} title="${pretty(ds)}">
+        ${PEOPLE.map(p=>half(e[p.id])).join("")}<span class="n">${i}</span></div>`;
     }
     html += "</div>";
     m++; if(m>11){m=0;y++;}
@@ -353,40 +477,67 @@ function renderCalendar(){
   el.innerHTML = html;
 }
 
+function renderGaps(){
+  const t = todayStr(), S = HABITS[tab].start, miss = [];
+  for(let d=S; d<t; d=addDays(d,1)) if(!PEOPLE.every(p => (log[tab][d]||{})[p.id])) miss.push(d);
+  document.getElementById("gaps").innerHTML = miss.length
+    ? `<div class="gap">⚠️ ${miss.length} day${miss.length>1?"s":""} missing a check-in (${miss.slice(-3).map(short).join(", ")}${miss.length>3?"…":""}). A missing day breaks the streak until it's filled in, so tap it and log it.</div>` : "";
+}
+
+function renderHistory(){
+  const el = document.getElementById("history");
+  if(todayStr() < HABITS[tab].start){ el.innerHTML = `<p class="empty">Your streaks will line up here once you start.</p>`; return; }
+  const r = runs(tab,"both");
+  if(!r.length){ el.innerHTML = `<p class="empty">No streak yet. Tonight's the night.</p>`; return; }
+  const max = Math.max(...r.map(x=>x.n));
+  el.innerHTML = r.map((x,i) => `<div class="hrow ${x.live?"cur":""}">
+      <span class="k">#${i+1}${x.live?" · now":""}</span>
+      <div class="bar" style="width:${(x.n/max)*100}%"></div>
+      <span class="v"><b>${x.n} day${x.n>1?"s":""}</b> · ${short(x.from)}${x.n>1?" – "+short(x.to):""}</span>
+    </div>`).reverse().join("");
+}
+
 function renderNotes(){
-  const items = [];
-  Object.keys(log).sort().reverse().forEach(day => PEOPLE.forEach(p => {
-    const e = log[day][p.id]; if(e && e.note) items.push({day,p,e});
+  const H_ = HABITS[tab], items = [];
+  Object.keys(log[tab]).sort().reverse().forEach(day => PEOPLE.forEach(p => {
+    const e = log[tab][day][p.id]; if(e && (e.note || (tab==="alcohol" && e.status==="slip"))) items.push({day,p,e});
   }));
-  document.getElementById("notes").innerHTML = items.length ? items.map(({day,p,e}) =>
-    `<div class="note"><span class="tag ${e.status}">${STATUS[e.status].icon} ${STATUS[e.status].label}</span>
-      <div><div class="who">${p.name} · ${pretty(day,{weekday:"short",day:"numeric",month:"short"})}</div><p>${esc(e.note)}</p></div></div>`).join("")
-    : `<p class="empty">Nothing yet. When you have something sweet but healthy, jot it down here.</p>`;
+  document.getElementById("notes").innerHTML = items.length ? items.map(({day,p,e}) => {
+    const s = H_.statuses[e.status] || {icon:"",label:e.status};
+    const extra = tab==="alcohol" && e.status==="slip"
+      ? `${e.drinks||"?"} drink${e.drinks===1?"":"s"}${e.types.length?" · "+e.types.map(k=>(DRINKS[k]||DRINKS.other).e+" "+(DRINKS[k]||DRINKS.other).n).join(", "):""}` : "";
+    return `<div class="note"><span class="tag ${e.status}">${s.icon} ${s.label}</span>
+      <div><div class="who">${p.name} · ${pretty(day,{weekday:"short",day:"numeric",month:"short"})}${extra?" · "+extra:""}</div>${e.note?`<p>${esc(e.note)}</p>`:""}</div></div>`;
+  }).join("") : `<p class="empty">${H_.emptyNotes}</p>`;
 }
 
 function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
 /* ---------- events ---------- */
+function setTab(t){ tab = t; draft = {}; try{ localStorage.setItem("rori-tab",t); history.replaceState(null,"","#"+t); }catch(e){} renderAll(); }
 document.addEventListener("click", e => {
+  const tb = e.target.closest(".tab"); if(tb){ setTab(tb.dataset.tab); return; }
   const c = e.target.closest(".choice");
-  if(c){ draft[c.dataset.p].status = c.dataset.s; renderPeople(); return; }
-  const b = e.target.closest(".btn[id^=save-]");
-  if(b){ save(b.id.slice(5)); return; }
+  if(c){ const d = draft[c.dataset.p]; d.status = c.dataset.s; if(tab==="alcohol" && d.status==="slip" && !d.drinks) d.drinks = 1; renderPeople(); return; }
+  const st = e.target.closest("[data-step]");
+  if(st){ const d = draft[st.dataset.p]; d.drinks = Math.min(50, Math.max(1, (d.drinks||1) + Number(st.dataset.step))); renderPeople(); return; }
+  const ch = e.target.closest(".chip");
+  if(ch){ const d = draft[ch.dataset.p], k = ch.dataset.drink; d.types = d.types.includes(k) ? d.types.filter(x=>x!==k) : [...d.types,k]; renderPeople(); return; }
+  const b = e.target.closest(".btn[id^=save-]"); if(b){ save(b.id.slice(5)); return; }
   const d = e.target.closest(".day[data-day]");
-  if(d){ selDate = d.dataset.day; for(const k in draft) delete draft[k]; renderPeople();
+  if(d){ selDate = d.dataset.day; draft = {}; renderPeople(); renderCalendar();
          document.getElementById("datePick").scrollIntoView({behavior:"smooth",block:"center"}); }
 });
 document.addEventListener("input", e => {
   const pid = e.target.dataset.note; if(!pid) return;
   draft[pid].note = e.target.value;
-  const saved = (log[selDate]||{})[pid], d = draft[pid];
-  const dirty = !saved || saved.status!==d.status || (saved.note||"")!==(d.note||"");
-  document.getElementById("save-"+pid).disabled = !d.status || !dirty;
+  document.getElementById("save-"+pid).disabled = !draft[pid].status || !isDirty(pid);
 });
 document.getElementById("datePick").addEventListener("change", e => {
-  if(!e.target.value || e.target.value > todayStr()) return;
-  selDate = e.target.value; for(const k in draft) delete draft[k]; renderPeople();
+  const v = e.target.value; if(!v || v > todayStr()) return;
+  selDate = v; draft = {}; renderPeople(); renderCalendar();
 });
+window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if(HABITS[h] && h!==tab) setTab(h); });
 document.addEventListener("visibilitychange", () => { if(!document.hidden){ if(selDate>todayStr()) selDate=todayStr(); load(); } });
 
 /* ---------- theme ---------- */
@@ -394,17 +545,16 @@ const root = document.documentElement, themeBtn = document.getElementById("theme
 const sysDark = () => matchMedia("(prefers-color-scheme: dark)").matches;
 function applyTheme(t){
   if(t) root.dataset.theme = t; else delete root.dataset.theme;
-  const dark = t ? t === "dark" : sysDark();
-  themeBtn.textContent = dark ? "☀️" : "🌙";
+  themeBtn.textContent = (t ? t === "dark" : sysDark()) ? "☀️" : "🌙";
 }
 let savedTheme = null; try{ savedTheme = localStorage.getItem("sf-theme"); }catch(e){}
 applyTheme(savedTheme);
 themeBtn.addEventListener("click", () => {
-  const dark = root.dataset.theme ? root.dataset.theme === "dark" : sysDark();
-  const next = dark ? "light" : "dark";
+  const next = (root.dataset.theme ? root.dataset.theme === "dark" : sysDark()) ? "light" : "dark";
   applyTheme(next); try{ localStorage.setItem("sf-theme", next); }catch(e){}
 });
 
+renderAll();
 load();
 </script>
 </body>
