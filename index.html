@@ -15,7 +15,7 @@
     --bg:#e6f2fb; --bg2:#d4e9f8; --card:#ffffff; --ink:#18304a; --muted:#6b8299; --line:#d2e5f3;
     --sage:#5fa8dc; --sage-soft:#dcedfa; --honey:#e0a63c; --honey-soft:#fbeccd;
     --rose:#e0707a; --rose-soft:#fadde0; --empty:#e9f1f7;
-    --rohan:#1f3d7a; --riya:#7b4fd0; --btn:#1f3d7a; --btn-ink:#ffffff;
+    --rohan:#111111; --riya:#7d1f3e; --btn:#1f3d7a; --btn-ink:#ffffff;
     color-scheme:light;
   }
   /* dark: night sky, still blue */
@@ -23,7 +23,7 @@
     --bg:#0c1622; --bg2:#10223a; --card:#13202f; --ink:#e6f1fb; --muted:#8aa3ba; --line:#22364b;
     --sage:#7cc2f0; --sage-soft:#173149; --honey:#e9b75a; --honey-soft:#3a3020;
     --rose:#ef8a92; --rose-soft:#3e2429; --empty:#1a2a3b;
-    --rohan:#7ea2f0; --riya:#b896f5; --btn:#a9d6f5; --btn-ink:#0c1622;
+    --rohan:#5b82e6; --riya:#f7b8cc; --btn:#a9d6f5; --btn-ink:#0c1622;
     color-scheme:dark;
   }
   @media (prefers-color-scheme: dark){
@@ -31,7 +31,7 @@
       --bg:#0c1622; --bg2:#10223a; --card:#13202f; --ink:#e6f1fb; --muted:#8aa3ba; --line:#22364b;
       --sage:#7cc2f0; --sage-soft:#173149; --honey:#e9b75a; --honey-soft:#3a3020;
       --rose:#ef8a92; --rose-soft:#3e2429; --empty:#1a2a3b;
-      --rohan:#7ea2f0; --riya:#b896f5; --btn:#a9d6f5; --btn-ink:#0c1622;
+      --rohan:#5b82e6; --riya:#f7b8cc; --btn:#a9d6f5; --btn-ink:#0c1622;
       color-scheme:dark;
     }
   }
@@ -52,7 +52,7 @@
   /* hero with photo */
   .card.hero-wrap{display:grid;grid-template-columns:minmax(0,300px) 1fr;padding:0;overflow:hidden}
   .hero-wrap .photo{position:relative;min-height:100%}
-  .hero-wrap .photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 35%}
+  .hero-wrap .photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
   @media (max-width:640px){
     .card.hero-wrap{grid-template-columns:1fr}
     .hero-wrap .photo img{aspect-ratio:4/3.4;height:auto}
@@ -77,6 +77,8 @@
   @media (max-width:640px){.grid2{grid-template-columns:1fr}}
   .person h2{font-size:22px;margin:0 0 2px;display:flex;align-items:center;gap:8px}
   .person h2 .sw{width:10px;height:10px;border-radius:50%}
+  .person h2 .av{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid currentColor;padding:2px;background:var(--card)}
+  .person h2{gap:12px!important}
   .stats{display:flex;gap:22px;margin:14px 0 18px}
   .stat b{display:block;font-family:Fraunces,serif;font-size:30px;font-weight:500;line-height:1.1;font-variant-numeric:tabular-nums}
   .stat span{font-size:12px;color:var(--muted)}
@@ -141,7 +143,7 @@
   </header>
 
   <section class="card hero-wrap">
-   <div class="photo"><img src="photo.jpg" alt="Rohan and Riya at sunset on the water"></div>
+   <div class="photo"><img src="photo.jpg" alt="Rohan and Riya"></div>
    <div class="hero">
     <div class="label" id="heroLabel">Days sugar-free, together</div>
     <div class="big" id="heroNum">0</div>
@@ -309,7 +311,7 @@ function renderPeople(){
     draft[p.id] = d;
     const dirty = !saved || saved.status!==d.status || (saved.note||"")!==(d.note||"");
     return `<div class="person">
-      <h2 class="${p.id}"><span class="sw" style="background:${p.color}"></span>${p.name}</h2>
+      <h2 class="${p.id}"><img class="av" src="${p.id}.jpg" alt="${p.name}">${p.name}</h2>
       <div class="stats">
         <div class="stat"><b class="c-${p.id}">${currentStreak(p.id)}</b><span>current streak</span></div>
         <div class="stat"><b>${bestStreak(p.id)}</b><span>best</span></div>
