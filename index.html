@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sugar Free · Rohan & Riya</title>
+<meta name="description" content="Rohan & Riya's sugar-free day counter">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f1e9; --card:#fffdf9; --ink:#2b2622; --muted:#8a8178; --line:#e8dfd2;
+    --sage:#6f8f72; --sage-soft:#dfe9dc; --honey:#d9a441; --honey-soft:#f7e9c8;
+    --rose:#c8695a; --rose-soft:#f4dcd6; --empty:#ede6da;
+    --rohan:#4f6f8f; --riya:#b8687f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1b1917; --card:#24211e; --ink:#f1ebe2; --muted:#a39a8f; --line:#38332d;
+      --sage:#8fb291; --sage-soft:#2e3a2f; --honey:#e2b357; --honey-soft:#3d3423;
+      --rose:#e08676; --rose-soft:#43302b; --empty:#2f2b27;
+      --rohan:#8fb0d1; --riya:#e09bb0;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:40px 16px 80px}
+  h1,h2,.serif{font-family:Fraunces,Georgia,serif;font-weight:500;letter-spacing:-.01em}
+  header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+  header h1{font-size:22px;margin:0}
+  header h1 em{font-style:italic;color:var(--sage)}
+  .sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+  .dot.ok{background:var(--sage)} .dot.err{background:var(--rose)} .dot.busy{background:var(--honey)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px}
+  section{margin-bottom:20px}
+  .label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600}
+
+  /* hero */
+  .hero{text-align:center;padding:44px 24px 36px;position:relative;overflow:hidden}
+  .hero .big{font-family:Fraunces,serif;font-size:clamp(96px,22vw,168px);line-height:.9;font-weight:300;margin:14px 0 6px;font-variant-numeric:tabular-nums}
+  .hero .sub{font-family:Fraunces,serif;font-size:20px;font-style:italic;color:var(--muted)}
+  .hero .meta{margin-top:18px;font-size:13px;color:var(--muted)}
+  .progress{height:6px;background:var(--empty);border-radius:99px;max-width:320px;margin:20px auto 8px;overflow:hidden}
+  .progress i{display:block;height:100%;background:var(--sage);border-radius:99px;transition:width .6s ease}
+
+  /* people */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:640px){.grid2{grid-template-columns:1fr}}
+  .person h2{font-size:22px;margin:0 0 2px;display:flex;align-items:center;gap:8px}
+  .person h2 .sw{width:10px;height:10px;border-radius:50%}
+  .stats{display:flex;gap:22px;margin:14px 0 18px}
+  .stat b{display:block;font-family:Fraunces,serif;font-size:30px;font-weight:500;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  .choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .choice{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:10px 6px;font:500 13px Inter,sans-serif;cursor:pointer;transition:all .15s}
+  .choice small{display:block;font-size:18px;margin-bottom:2px}
+  .choice:hover{border-color:var(--muted)}
+  .choice[aria-pressed="true"][data-s="clean"]{background:var(--sage-soft);border-color:var(--sage)}
+  .choice[aria-pressed="true"][data-s="healthy"]{background:var(--honey-soft);border-color:var(--honey)}
+  .choice[aria-pressed="true"][data-s="slip"]{background:var(--rose-soft);border-color:var(--rose)}
+  textarea{width:100%;margin-top:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 12px;font:14px Inter,sans-serif;resize:vertical;min-height:44px}
+  textarea:focus{outline:none;border-color:var(--sage)}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}
+  .saved{font-size:12px;color:var(--muted)}
+  .btn{border:0;background:var(--ink);color:var(--bg);border-radius:99px;padding:9px 18px;font:600 13px Inter,sans-serif;cursor:pointer}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  .datebar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .datebar .serif{font-size:20px}
+  .datebar input{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:6px 10px;font:13px Inter,sans-serif}
+
+  /* calendar */
+  .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px;max-width:480px}
+  .dow{font-size:10px;color:var(--muted);text-align:center;letter-spacing:.08em}
+  .day{aspect-ratio:1;border-radius:10px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;position:relative;cursor:pointer;border:1px solid transparent}
+  .day.today{border-color:var(--ink)}
+  .day.future,.day.before{cursor:default;opacity:.35}
+  .day .h{background:var(--empty)}
+  .day .h.clean{background:var(--sage)} .day .h.healthy{background:var(--honey)} .day .h.slip{background:var(--rose)}
+  .day .n{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--ink);mix-blend-mode:normal}
+  .day .h.clean~.n,.day .h.slip~.n{color:#fff}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:14px}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .monthname{font-family:Fraunces,serif;font-size:17px;margin:18px 0 0}
+
+  /* notes */
+  .note{padding:14px 0;border-top:1px solid var(--line);display:flex;gap:12px}
+  .note:first-child{border-top:0}
+  .note .tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;white-space:nowrap;height:fit-content}
+  .tag.healthy{background:var(--honey-soft);color:var(--ink)} .tag.slip{background:var(--rose-soft);color:var(--ink)} .tag.clean{background:var(--sage-soft);color:var(--ink)}
+  .note p{margin:2px 0 0}
+  .note .who{font-size:12px;color:var(--muted)}
+  .empty{color:var(--muted);font-style:italic;font-family:Fraunces,serif}
+
+  .milestones{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;justify-content:center}
+  .ms{font-size:12px;padding:5px 11px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+  .ms.done{background:var(--sage);border-color:var(--sage);color:#fff}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:40px;font-family:Fraunces,serif;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Rohan &amp; Riya, <em>sugar free</em></h1>
+    <div class="sync"><span class="dot" id="dot"></span><span id="syncText">connecting…</span></div>
+  </header>
+
+  <section class="card hero">
+    <div class="label" id="heroLabel">Days sugar-free, together</div>
+    <div class="big" id="heroNum">0</div>
+    <div class="sub" id="heroSub">&nbsp;</div>
+    <div class="progress"><i id="msBar" style="width:0"></i></div>
+    <div class="meta" id="msText"></div>
+    <div class="milestones" id="milestones"></div>
+  </section>
+
+  <section class="card">
+    <div class="datebar">
+      <div>
+        <div class="label">Tonight's check-in</div>
+        <div class="serif" id="dateTitle"></div>
+      </div>
+      <input type="date" id="datePick" aria-label="Pick a day to log">
+    </div>
+    <div class="grid2" id="people"></div>
+  </section>
+
+  <section class="card">
+    <div class="label">The calendar</div>
+    <div id="calendar"></div>
+    <div class="legend">
+      <span><i style="background:var(--sage)"></i>No sugar</span>
+      <span><i style="background:var(--honey)"></i>Healthy sugar (still counts)</span>
+      <span><i style="background:var(--rose)"></i>Slipped</span>
+      <span><i style="background:var(--empty)"></i>Not logged</span>
+      <span>Left half Rohan · right half Riya</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="label">Notes</div>
+    <div id="notes" style="margin-top:6px"></div>
+  </section>
+
+  <footer>Log every night before sleeping. Tap any day on the calendar to fix it.</footer>
+</div>
+
+<script>
+const SUPABASE_URL = "https://gxvgujdguviqjqhilrms.supabase.co";
+const SUPABASE_KEY = "sb_publishable_rvwJxflLt6ykiOhvq-GCOA_hONUr3YL";
+const START = "2026-11-09";               // Day 1 of no sugar
+const PEOPLE = [
+  { id: "rohan", name: "Rohan", color: "var(--rohan)" },
+  { id: "riya",  name: "Riya",  color: "var(--riya)"  },
+];
+const MILESTONES = [3, 7, 14, 21, 30, 50, 75, 100, 150, 200, 365];
+const STATUS = {
+  clean:   { icon: "🌿", label: "No sugar" },
+  healthy: { icon: "🍯", label: "Healthy sugar" },
+  slip:    { icon: "🍰", label: "Slipped" },
+};
+
+const H = { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json" };
+let log = {};            // log["2026-11-09"]["rohan"] = {status,note}
+let selDate = todayStr();
+const draft = {};        // draft[person] = {status,note}
+
+/* ---------- dates (local time) ---------- */
+function ymd(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function todayStr(){ return ymd(new Date()); }
+function parse(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function addDays(s,n){ const d=parse(s); d.setDate(d.getDate()+n); return ymd(d); }
+function diffDays(a,b){ return Math.round((parse(b)-parse(a))/864e5); }
+function pretty(s,opts={weekday:"long",day:"numeric",month:"long"}){ return parse(s).toLocaleDateString("en-IN",opts); }
+
+/* ---------- sync ---------- */
+function setSync(state,text){ document.getElementById("dot").className="dot "+state; document.getElementById("syncText").textContent=text; }
+
+async function load(){
+  setSync("busy","syncing…");
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/sugar_log?select=day,person,status,note&order=day.asc`,{headers:H});
+    if(!r.ok) throw new Error(r.status);
+    const rows = await r.json();
+    log = {};
+    rows.forEach(x => { (log[x.day] ||= {})[x.person] = { status:x.status, note:x.note||"" }; });
+    setSync("ok","synced");
+  }catch(e){ setSync("err","offline – couldn't load"); }
+  renderAll();
+}
+
+async function save(pid){
+  const d = draft[pid]; if(!d || !d.status) return;
+  const btn = document.getElementById("save-"+pid); btn.disabled = true; btn.textContent = "Saving…";
+  setSync("busy","saving…");
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/sugar_log?on_conflict=day,person`,{
+      method:"POST",
+      headers:{...H, Prefer:"resolution=merge-duplicates,return=minimal"},
+      body: JSON.stringify({ day:selDate, person:pid, status:d.status, note:(d.note||"").trim()||null, updated_at:new Date().toISOString() })
+    });
+    if(!r.ok) throw new Error(r.status);
+    (log[selDate] ||= {})[pid] = { status:d.status, note:(d.note||"").trim() };
+    delete draft[pid];
+    setSync("ok","saved");
+  }catch(e){ setSync("err","save failed – try again"); }
+  renderAll();
+}
+
+/* ---------- streak maths ---------- */
+const ok = s => s === "clean" || s === "healthy";
+function dayOk(day, who){ // who: person id or "both"
+  const e = log[day] || {};
+  return who === "both" ? PEOPLE.every(p => e[p.id] && ok(e[p.id].status)) : !!(e[who] && ok(e[who].status));
+}
+function currentStreak(who){
+  const t = todayStr(); if(t < START) return 0;
+  // if tonight isn't logged yet, count up to yesterday so the streak doesn't look broken during the day
+  let d = dayOk(t,who) ? t : addDays(t,-1), n = 0;
+  while(d >= START && dayOk(d,who)){ n++; d = addDays(d,-1); }
+  return n;
+}
+function bestStreak(who){
+  const t = todayStr(); let best=0, run=0;
+  for(let d=START; d<=t; d=addDays(d,1)){ if(dayOk(d,who)){ run++; best=Math.max(best,run);} else if(d!==t) run=0; }
+  return best;
+}
+function countStatus(pid,s){ return Object.values(log).filter(e => e[pid] && e[pid].status===s).length; }
+
+/* ---------- render ---------- */
+function renderAll(){ renderHero(); renderPeople(); renderCalendar(); renderNotes(); }
+
+function renderHero(){
+  const t = todayStr();
+  const num = document.getElementById("heroNum"), sub = document.getElementById("heroSub"), lab = document.getElementById("heroLabel");
+  if(t < START){
+    const n = diffDays(t,START);
+    lab.textContent = "Countdown to day one";
+    num.textContent = n;
+    sub.textContent = n===1 ? "day to go — last dessert tonight 🍫" : "days until we quit sugar";
+    document.getElementById("msText").textContent = "Starts " + pretty(START);
+    document.getElementById("msBar").style.width = "0";
+    renderMilestones(0); return;
+  }
+  const s = currentStreak("both");
+  lab.textContent = "Days sugar-free, together";
+  num.textContent = s;
+  const loggedToday = PEOPLE.every(p => log[t] && log[t][p.id]);
+  sub.textContent = s===0 ? "Day one starts tonight. You've got this." :
+                    s===1 ? "day down. Many more to go." : "days in a row, both of you";
+  const next = MILESTONES.find(m => m > s) || s;
+  const prev = [...MILESTONES].reverse().find(m => m <= s) || 0;
+  document.getElementById("msBar").style.width = (next===prev?100:((s-prev)/(next-prev))*100) + "%";
+  document.getElementById("msText").textContent =
+    (next>s ? `${next-s} more to reach ${next} days` : "Every milestone hit 🎉") +
+    (loggedToday ? "" : " · tonight's check-in pending");
+  renderMilestones(s);
+}
+function renderMilestones(s){
+  document.getElementById("milestones").innerHTML =
+    MILESTONES.slice(0,8).map(m => `<span class="ms ${s>=m?"done":""}">${m}d</span>`).join("");
+}
+
+function renderPeople(){
+  document.getElementById("dateTitle").textContent = selDate===todayStr() ? "Tonight · "+pretty(selDate,{day:"numeric",month:"short"}) : pretty(selDate);
+  const dp = document.getElementById("datePick"); dp.value = selDate; dp.max = todayStr();
+  const before = selDate < START;
+  document.getElementById("people").innerHTML = PEOPLE.map(p => {
+    const saved = (log[selDate]||{})[p.id];
+    const d = draft[p.id] || (saved ? {...saved} : {status:null,note:""});
+    draft[p.id] = d;
+    const dirty = !saved || saved.status!==d.status || (saved.note||"")!==(d.note||"");
+    return `<div class="person">
+      <h2><span class="sw" style="background:${p.color}"></span>${p.name}</h2>
+      <div class="stats">
+        <div class="stat"><b>${currentStreak(p.id)}</b><span>current streak</span></div>
+        <div class="stat"><b>${bestStreak(p.id)}</b><span>best</span></div>
+        <div class="stat"><b>${countStatus(p.id,"slip")}</b><span>slips</span></div>
+      </div>
+      <div class="choices">
+        ${Object.entries(STATUS).map(([k,v]) =>
+          `<button class="choice" data-p="${p.id}" data-s="${k}" aria-pressed="${d.status===k}"><small>${v.icon}</small>${v.label}</button>`).join("")}
+      </div>
+      <textarea data-note="${p.id}" rows="2" placeholder="${d.status==="healthy"?"What was it? e.g. 2 dates, mango, honey in tea":d.status==="slip"?"What happened? No judgement.":"Any note for today (optional)"}">${esc(d.note||"")}</textarea>
+      <div class="row">
+        <span class="saved">${before?"Before day one":saved?(dirty?"Unsaved changes":"Saved ✓"):"Not logged yet"}</span>
+        <button class="btn" id="save-${p.id}" ${(!d.status||!dirty)?"disabled":""}>Save</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderCalendar(){
+  const t = todayStr(), el = document.getElementById("calendar");
+  const startD = parse(START), endD = parse(t > START ? t : START);
+  let html = "", y = startD.getFullYear(), m = startD.getMonth();
+  while(new Date(y,m,1) <= endD){
+    const first = new Date(y,m,1), days = new Date(y,m+1,0).getDate();
+    const lead = (first.getDay()+6)%7; // Monday-first
+    html += `<div class="monthname">${first.toLocaleDateString("en-IN",{month:"long",year:"numeric"})}</div><div class="cal">`;
+    html += ["M","T","W","T","F","S","S"].map(x=>`<div class="dow">${x}</div>`).join("");
+    html += "<div></div>".repeat(lead);
+    for(let i=1;i<=days;i++){
+      const ds = ymd(new Date(y,m,i)), e = log[ds]||{};
+      const cls = ds>t?"future":ds<START?"before":"";
+      html += `<div class="day ${cls} ${ds===t?"today":""}" ${cls?"":`data-day="${ds}"`} title="${pretty(ds)}">
+        ${PEOPLE.map(p=>`<span class="h ${e[p.id]?e[p.id].status:""}"></span>`).join("")}
+        <span class="n">${i}</span></div>`;
+    }
+    html += "</div>";
+    m++; if(m>11){m=0;y++;}
+  }
+  el.innerHTML = html;
+}
+
+function renderNotes(){
+  const items = [];
+  Object.keys(log).sort().reverse().forEach(day => PEOPLE.forEach(p => {
+    const e = log[day][p.id]; if(e && e.note) items.push({day,p,e});
+  }));
+  document.getElementById("notes").innerHTML = items.length ? items.map(({day,p,e}) =>
+    `<div class="note"><span class="tag ${e.status}">${STATUS[e.status].icon} ${STATUS[e.status].label}</span>
+      <div><div class="who">${p.name} · ${pretty(day,{weekday:"short",day:"numeric",month:"short"})}</div><p>${esc(e.note)}</p></div></div>`).join("")
+    : `<p class="empty">Nothing yet. When you have something sweet but healthy, jot it down here.</p>`;
+}
+
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---------- events ---------- */
+document.addEventListener("click", e => {
+  const c = e.target.closest(".choice");
+  if(c){ draft[c.dataset.p].status = c.dataset.s; renderPeople(); return; }
+  const b = e.target.closest(".btn[id^=save-]");
+  if(b){ save(b.id.slice(5)); return; }
+  const d = e.target.closest(".day[data-day]");
+  if(d){ selDate = d.dataset.day; for(const k in draft) delete draft[k]; renderPeople();
+         document.getElementById("datePick").scrollIntoView({behavior:"smooth",block:"center"}); }
+});
+document.addEventListener("input", e => {
+  const pid = e.target.dataset.note; if(!pid) return;
+  draft[pid].note = e.target.value;
+  const saved = (log[selDate]||{})[pid], d = draft[pid];
+  const dirty = !saved || saved.status!==d.status || (saved.note||"")!==(d.note||"");
+  document.getElementById("save-"+pid).disabled = !d.status || !dirty;
+});
+document.getElementById("datePick").addEventListener("change", e => {
+  if(!e.target.value || e.target.value > todayStr()) return;
+  selDate = e.target.value; for(const k in draft) delete draft[k]; renderPeople();
+});
+document.addEventListener("visibilitychange", () => { if(!document.hidden){ if(selDate>todayStr()) selDate=todayStr(); load(); } });
+
+load();
+</script>
+</body>
+</html>
